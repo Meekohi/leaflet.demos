@@ -5,7 +5,7 @@ L.D3 = L.Class.extend({
 		type:"json",
 		topojson:false,
 		pathClass:"path"
-		
+
 	},
 	initialize: function (data,options) {
 		var _this = this;
@@ -38,7 +38,7 @@ L.D3 = L.Class.extend({
 			_this._loaded = true;
 			_this.fire("dataLoaded");
 		}
-		
+
 	},
 	onAdd: function (map) {
 		this._map = map;
@@ -67,8 +67,8 @@ L.D3 = L.Class.extend({
 			this.options.before.call(this, this.data);
 		}
 		this._feature = this._g.selectAll("path").data(this.options.topojson?this.data.geometries:this.data.features).enter().append("path").attr("class", this.options.pathClass);
-		
-		
+
+
 		this._map.on('viewreset', this._reset, this);
 		this._reset();
 	},
@@ -79,7 +79,7 @@ L.D3 = L.Class.extend({
 	},
 
 	_reset: function () {
-		 var bottomLeft = this._project(this.bounds[0]),
+		var bottomLeft = this._project(this.bounds[0]),
         topRight = this._project(this.bounds[1]);
 
     this._el .attr("width", topRight[0] - bottomLeft[0])
@@ -109,10 +109,10 @@ L.D3 = L.Class.extend({
 			}else if(typeof _this._popupContent==="function"){
 				_this.fire("pathClicked",{cont:_this._popupContent(props)});
 			}
-			
+
 		},true);
 		_this.on("pathClicked",function(e){_this._popup.setContent(e.cont);
-			_this._openable=true;;});
+			_this._openable=true;});
 		_this._map.on("click",function(e){
 			if(_this._openable){
 				_this._openable=false;
@@ -121,7 +121,7 @@ L.D3 = L.Class.extend({
 		});
 	}
 
-	
+
 });
 L.d3=function(data,options){
 	return new L.D3(data,options);
