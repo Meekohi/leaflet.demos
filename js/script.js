@@ -20,7 +20,7 @@ var data={}, layers={}, fills =[
 	"rgb(127,188,65)",
 	"rgb(69, 117, 180)"
 ];
-d3.json("json/flickr.json", dealwithData);
+d3.json("json/rva.json", dealwithData);
 
 function dealwithData(oa){
 	data.json= oa.features.map(function(v){
@@ -35,9 +35,14 @@ function dealwithData(oa){
 }
 
 function points(index){
-  layers.points = L.layerGroup(data.json.slice(index,index+1000).map(function(v){
-    var c = L.circleMarker(L.latLng(v[0],v[1]),{radius:2,stroke:false,fillOpacity:0.4,clickable:true,color:fills[0]});
-    c.bindPopup("<img src='"+v[2]+"'/>",{maxWidth:150,minWidth:150,maxHeight:150});
+  console.log(index,"of",data.json.length);
+  var dataSlice = data.json.slice(index,index+1000);
+  if(dataSlice.length === 0) return;
+  layers.points = L.layerGroup(dataSlice.map(function(v){
+    var hasThumb = v[2] ? true : false;
+    var c = L.circleMarker(L.latLng(v[0],v[1]),{radius:2,stroke:false,fillOpacity:0.4,clickable:hasThumb,color:fills[0]});
+    if(hasThumb)
+      c.bindPopup("<img src='"+v[2]+"'/>",{maxWidth:150,minWidth:150,maxHeight:150});
     return c;
 	}));
   layers.points.addTo(m);
