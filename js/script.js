@@ -20,13 +20,19 @@ var data={}, layers={}, fills =[
 	"rgb(127,188,65)",
 	"rgb(69, 117, 180)"
 ];
-d3.json("json/rva.json", dealwithData);
+
+var colorScale = d3.scale.quantize().domain([moment("July 2013").unix(), moment("May 2014").unix()]).range(colorbrewer.PuBu[9].slice(4));
+d3.json("json/lort.json", dealwithData);
 
 function dealwithData(oa){
+  console.log(oa.features[0]);
 	data.json= oa.features.map(function(v){
-    return [v.geometry.coordinates[0],v.geometry.coordinates[1], v.properties.thumbnail];
+    return [v.geometry.coordinates[0],v.geometry.coordinates[1], v.properties.thumbnail, v.properties.created_time];
 	});
-  points(0);
+
+  //centroids();
+  points(0,1000);
+  //removePoints(0,1000);
   //lc.addOverlay(layers.points,"Instagram");
   //veronoi();
   //delaunay();
@@ -34,26 +40,61 @@ function dealwithData(oa){
   //quadtree();
 }
 
-function points(index){
-  console.log(index,"of",data.json.length);
-  var dataSlice = data.json.slice(index,index+1000);
-  if(dataSlice.length === 0) return;
+function points(index, chunkSize){
+  //console.log(index,"of",data.json.length);
+  var dataSlice = data.json.slice(index,index+chunkSize);
+  if(dataSlice.length === 0) {
+    // all done, start over!
+    setTimeout(function(){points(0,chunkSize);},1);
+    return;
+  }
+  var bounds = m.getBounds();
+  dataSlice = _.filter(dataSlice,function(v){
+    return bounds.contains(L.latLng(v[0],v[1]));
+  });
   layers.points = L.layerGroup(dataSlice.map(function(v){
     var hasThumb = v[2] ? true : false;
-    var c = L.circleMarker(L.latLng(v[0],v[1]),{radius:2,stroke:false,fillOpacity:0.4,clickable:hasThumb,color:fills[0]});
+    var c = L.circleMarker(L.latLng(v[0],v[1]),{
+      radius:2,
+      stroke:false,
+      fillOpacity:0.4,
+      clickable:hasThumb,
+      color:colorScale(moment(v[3]).unix())
+    });
     if(hasThumb)
-      c.bindPopup("<img src='"+v[2]+"'/>",{maxWidth:150,minWidth:150,maxHeight:150});
+      c.bindPopup("<img src='"+v[2]+"'/><br/><small>"+moment.unix(v[3]).format('MMM Do YYYY, h:mm a')+"</small>+<br/><small>"+v[0]+", "+v[1]+"</small>",{maxWidth:150,minWidth:150,maxHeight:150});
     return c;
 	}));
   layers.points.addTo(m);
-  setTimeout(function(){points(index+1000);},1);
+  setTimeout(function(){points(index+chunkSize,chunkSize);},1);
 }
-function veronoi(){
-  data.veronoi = d3.geom.voronoi(data.json);
-  layers.veronoi = L.layerGroup(data.veronoi.map(function(v){
-		return L.polygon(v,{stroke:false,fillOpacity:0.7,color:fills[Math.floor((Math.random()*9))]});
-	}));
-	lc.addOverlay(layers.veronoi,"veronoi");
+function centroids(){
+  // Thingy to spam dots for every centroid
+  dots = [];
+  for(var lat = 0; lat < 90; lat += 0.089)
+  {
+    if(lat < 37) continue;
+    if(lat > 40) continue;
+    for(var lon = -180; lon < 180; lon += 0.089)
+    {
+      if(lon < -80) continue;
+      if(lon > -74) continue;
+      dots.push([lat,lon]);
+    }
+  }
+  console.log(dots.length);
+  var rects = L.layerGroup(dots.map(function(v){
+    //var bounds = [[v[0]-0.089/2,v[1]-0.089*Math.cos(v[0] * Math.PI/180)/2],[v[0]+0.089/2,v[1]+0.089*Math.cos(v[0] * Math.PI/180)/2]];
+    var bounds = [[v[0]-0.089/2,v[1]-0.089/2],[v[0]+0.089/2,v[1]+0.089/2]];
+    var cc = L.rectangle(bounds,{
+      weight:1,
+      color:fills[2],
+      clickable:true
+    });
+    cc.bindPopup(v[0].toFixed(3)+", "+v[1].toFixed(3));
+    return cc;
+  }));
+  rects.addTo(m);
 }
 function delaunay(){
   data.delaunay = d3.geom.delaunay(data.json);
@@ -77,30 +118,6 @@ function quadtree(){
 	});
 	lc.addOverlay(layers.quadtree,"quadtree");
 }
-
-
-// layers.svg=L.d3("json/ma.topo.json",{
-// 	topojson:"TOWNS",
-// 	svgClass : "Spectral",
-// 	pathClass:function(d) {
-// 		return "town q" + (10-layers.svg.quintile(d.properties.pop/layers.svg.path.area(d)))+"-11";
-// 	},
-// 	before: function(data){
-// 		var _this = this;
-// 		this.quintile=d3.scale.quantile().domain(data.geometries.map(function(d){return d.properties.pop/_this.path.area(d);})).range(d3.range(11));
-// 	}
-// });
-// layers.svg.bindPopup(function(p){
-// 	var out =[];
-// 	for(var key in p){
-// 	if(key !== "FOURCOLOR"){
-// 		out.push("<strong>"+key+"</strong>: "+p[key]);
-// 		}
-// 	}
-// 	return out.join("<br/>");
-// 	});
-// lc.addOverlay(layers.svg,"Population density");
-
 
 window.public = {};
 window.public.data = data;
