@@ -1,7 +1,7 @@
-(function () {
 var m = L.map('mapID').setView([38.035, -78.495], 14);
-var arqgram = L.tileLayer('http://localhost/~meekohi/instagramtiles3/{z}/{x}/{y}.png',{zIndex:5}).addTo(m);
-var arqstreet = L.tileLayer('http://localhost/~meekohi/streetviewtiles3/{z}/{x}/{y}.png',{zIndex:4}).addTo(m);
+(function () {
+var arqgram = L.tileLayer('http://localhost/~meekohi/instagramtiles/{z}/{x}/{y}.png',{zIndex:5}).addTo(m);
+var arqstreet = L.tileLayer('http://localhost/~meekohi/streetviewtiles/{z}/{x}/{y}.png',{zIndex:4}).addTo(m);
 //var arqgram2 = L.tileLayer('http://localhost/~meekohi/instagramtiles2/{z}/{x}/{y}.png',{zIndex:4}).addTo(m);
 //var arqworld = L.tileLayer('https://{s}.tiles.mapbox.com/v3/mapbox.world-black/{z}/{x}/{y}.png',{zIndex:3}).addTo(m);
 
@@ -30,7 +30,7 @@ var data={}, layers={}, fills =[
 
 var colorScale = d3.scale.quantize().domain([moment("July 2013").unix(), moment("May 2014").unix()]).range(colorbrewer.PuBu[9].slice(4));
 var svColorScale = d3.scale.quantize().domain([1403896539 , 1403898126]).range(colorbrewer.OrRd[9].slice(4));
-d3.json("json/2014-07-30.sv.json", dealwithData);
+d3.json("json/2014-07-31.sv.json", dealwithData);
 
 function dealwithData(oa){
   console.log(oa.features[0]);
@@ -39,13 +39,9 @@ function dealwithData(oa){
 	});
 
   //centroids();
-  points(0,1000);
+  //points(0,1000);
   //removePoints(0,1000);
   //lc.addOverlay(layers.points,"Instagram");
-  //veronoi();
-  //delaunay();
-  //clusters();
-  //quadtree();
 }
 
 function points(index, chunkSize){
@@ -54,7 +50,7 @@ function points(index, chunkSize){
   if(dataSlice.length === 0) {
     // all done! start over?
     //setTimeout(function(){points(0,chunkSize);},1);
-    d3.json("json/cville.json", dealwithData);
+    //d3.json("json/cville.json", dealwithData);
     return;
   }
   var bounds = m.getBounds();
@@ -62,15 +58,15 @@ function points(index, chunkSize){
     return bounds.contains(L.latLng(v[0],v[1]));
   });
 
-  //!
-  dataSlice = _.filter(dataSlice, function(v,i){
-    return !(i%4);
+  // !
+  dataSlice = _.filter(dataSlice,function(v,i){
+    return i%32 === 0;
   });
-  //!
+
   var newLayer = dataSlice.map(function(v){
     var hasThumb = v[2] ? true : false;
     var c = L.circleMarker(L.latLng(v[0],v[1]),{
-      radius:2,
+      radius:1,
       stroke:false,
       fillOpacity:0.4,
       clickable:hasThumb,
@@ -111,28 +107,6 @@ function centroids(){
     return cc;
   }));
   rects.addTo(m);
-}
-function delaunay(){
-  data.delaunay = d3.geom.delaunay(data.json);
-  layers.delaunay = L.layerGroup(data.delaunay.map(function(v){
-		return L.polygon(v,{stroke:false,fillOpacity:0.7,color:fills[Math.floor((Math.random()*9))]});
-	}));
-	lc.addOverlay(layers.delaunay,"delaunay");
-}
-function clusters(){
-  layers.clusters= new L.MarkerClusterGroup();
-	layers.clusters.addLayers(data.json.map(function(v){
-		return L.marker(L.latLng(v));
-	}));
-	lc.addOverlay(layers.clusters,"clusters");
-}
-function quadtree(){
-  data.quadtree = d3.geom.quadtree(data.json.map(function(v){return {x:v[0],y:v[1]};}));
-	layers.quadtree = L.layerGroup();
-	data.quadtree.visit(function(quad, lat1, lng1, lat2, lng2){
-		layers.quadtree.addLayer(L.rectangle([[lat1,lng1],[lat2,lng2]],{fillOpacity:0,weight:1,color:"#000",clickable:false}));
-	});
-	lc.addOverlay(layers.quadtree,"quadtree");
 }
 
 window.public = {};
