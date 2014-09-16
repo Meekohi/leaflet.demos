@@ -1,7 +1,7 @@
 var m = L.map('mapID').setView([38.035, -78.495], 14);
 (function () {
-var arqgram = L.tileLayer('http://localhost/~meekohi/instagramtiles/{z}/{x}/{y}.png',{zIndex:5}).addTo(m);
-var arqstreet = L.tileLayer('http://localhost/~meekohi/streetviewtiles/{z}/{x}/{y}.png',{zIndex:4}).addTo(m);
+var arqgram = L.tileLayer('http://localhost/~meekohi/instagramtilesA/{z}/{x}/{y}.png',{zIndex:5}).addTo(m);
+//var arqstreet = L.tileLayer('http://localhost/~meekohi/streetviewtiles/{z}/{x}/{y}.png',{zIndex:4}).addTo(m);
 //var arqgram2 = L.tileLayer('http://localhost/~meekohi/instagramtiles2/{z}/{x}/{y}.png',{zIndex:4}).addTo(m);
 //var arqworld = L.tileLayer('https://{s}.tiles.mapbox.com/v3/mapbox.world-black/{z}/{x}/{y}.png',{zIndex:3}).addTo(m);
 
@@ -29,28 +29,35 @@ var data={}, layers={}, fills =[
 ];
 
 var colorScale = d3.scale.quantize().domain([moment("July 2013").unix(), moment("May 2014").unix()]).range(colorbrewer.PuBu[9].slice(4));
-var svColorScale = d3.scale.quantize().domain([1403896539 , 1403898126]).range(colorbrewer.OrRd[9].slice(4));
-d3.json("json/2014-07-31.sv.json", dealwithData);
+var svColorScale = d3.scale.quantize().domain([1409054400 , 1409097600]).range(colorbrewer.OrRd[9].slice(4));
+//d3.json("json/sv.json", dealwithData);
 
 function dealwithData(oa){
   console.log(oa.features[0]);
+  var times = _.map(oa.features,function(f){
+    return moment(f.properties.created_time).unix();
+  });
+  svColorScale = d3.scale.quantize().domain([_.min(times) , _.max(times)]).range(colorbrewer.OrRd[9].slice(4));
 	data.json = oa.features.map(function(v){
     return [v.geometry.coordinates[0],v.geometry.coordinates[1], v.properties.thumbnail, v.properties.created_time, v.properties.pgid];
 	});
 
   //centroids();
-  //points(0,1000);
+  points(0,1000);
   //removePoints(0,1000);
   //lc.addOverlay(layers.points,"Instagram");
 }
+
+var ALORT = 0;
 
 function points(index, chunkSize){
   //console.log(index,"of",data.json.length);
   var dataSlice = data.json.slice(index,index+chunkSize);
   if(dataSlice.length === 0) {
     // all done! start over?
-    //setTimeout(function(){points(0,chunkSize);},1);
-    //d3.json("json/cville.json", dealwithData);
+    // setTimeout(function(){points(0,chunkSize);},1);
+    //d3.json("json/sv.json", dealwithData);
+    console.log(ALORT);
     return;
   }
   var bounds = m.getBounds();
@@ -59,14 +66,15 @@ function points(index, chunkSize){
   });
 
   // !
-  dataSlice = _.filter(dataSlice,function(v,i){
-    return i%32 === 0;
-  });
+  // dataSlice = _.filter(dataSlice,function(v,i){
+  //   return i%32 === 0;
+  // });
 
   var newLayer = dataSlice.map(function(v){
+    ALORT++;
     var hasThumb = v[2] ? true : false;
     var c = L.circleMarker(L.latLng(v[0],v[1]),{
-      radius:1,
+      radius:1.5,
       stroke:false,
       fillOpacity:0.4,
       clickable:hasThumb,

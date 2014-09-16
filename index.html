@@ -2,57 +2,91 @@
 <html lang="en">
   <head>
     <meta charset='utf-8'/>
-        <title>
-            Leaflet
-        </title>
-        <style>
-            html { height: 100% }
-            body { height: 100%; margin: 0; padding: 0;}
-            #mapID{ height: 100% }
-            .leaflet-bottom+.leaflet-right {display:none;}
-        </style>
-         <!--[if lte IE 8]>
-            <script src="js/ddr-ecma5-min.js"></script>
-        <![endif]-->
-        <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.5.0/pure-min.css">
-        <link rel="stylesheet" href="css/colorbrewer.css" />
-        <style>
-        .town {
-        	stroke-width : 0;
-        	fill: #000;
-        	fill-opacity: .6;
-        	stroke: #fff;
-        }
-
-        .town:hover {
-          fill: rgb(109, 28, 28);
-          fill-opacity: .7;
-          cursor:pointer;
-        }
-        </style>
-    </head>
-    <body>
-        <div id="mapID" style='background-color:white;'></div>
-        <nav style='position:absolute; top:10px; left:80px;'>
-            <form class="pure-form" role="search">
-                <fieldset>
-                  <input id="search" type="text" class="pure-input-rounded" placeholder="Search">
-                </fieldset>
-            </form>
+    <title>
+      Leaflet
+    </title>
+    <style>
+      html { height: 100% }
+      body { height: 100%; margin: 0; padding: 0;}
+      #mapID{ height: 100% }
+      .leaflet-bottom+.leaflet-right {display:none;}
+      .searchResults {
+        list-style-type: none;
+        padding:0;
+        margin:0;
+      }
+      .searchResultsContainer {
+        height:100%;
+        overflow: scroll;
+      }
+      .searchResults li {
+        padding:0px;
+        width:100%;
+        border-bottom:1px solid #eee;
+        max-height:64px;
+      }
+      .searchResults li.active {
+        background-color:lightgreen;
+      }
+      .leaflet-overlay-pane g.active path{
+        stroke-width:10px;
+      }
+      .searchResults img {
+        width:64px;
+        height:64px;
+      }
+    </style>
+    <!--[if lte IE 8]>
+      <script src="js/ddr-ecma5-min.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.5.0/pure-min.css">
+    <link rel="stylesheet" href="css/colorbrewer.css" />
+  </head>
+  <body>
+    <div class="pure-g" style="height:100%;">
+      <div class="pure-u-1-4 searchResultsContainer">
+        <ul class="searchResults" id="searchResults">
+          <li id="{{id}}_row">
+            <div class='pure-u'>
+              <a href='{{link}}'><img src='{{images.thumbnail.url}}'/></a>
+            </div>
+            <div class='pure-u-3-4'>
+              <div style='padding-top:5px; font-size:12pt; font-weight:100;'>
+              {{user.full_name}} ({{user.username}})<br/>
+              <span style='color:#999;'>{{created_time}}</span>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div class="pure-u-3-4" style="height:100%;">
+        <div id="mapID" style='border-left:1px solid #ccc;'>
+          <!-- The Map -->
+        </div>
+        <nav style='position:absolute; top:10px; padding-left:80px;'>
+          <form class="pure-form" role="search">
+            <fieldset>
+              <input id="search" type="text" class="pure-input-rounded" placeholder="Search">
+            </fieldset>
+          </form>
         </nav>
-        <script type="text/javascript" src="js/moment.js"></script>
-        <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
-        <script type="text/javascript" src="js/leaflet.js"></script>
-        <script type="text/javascript" src="js/leaflet.css.js"></script>
-        <script type="text/javascript" src="js/leaflet.markercluster.js"></script>
-        <script type="text/javascript" src="js/leaflet-providers.js"></script>
-        <script type="text/javascript" src="js/leaflet.hash.js"></script>
-        <script type="text/javascript" src="js/d3.v3.js"></script>
-        <script type="text/javascript" src="js/colorbrewer.js"></script>
-        <script type="text/javascript" src="js/topojson.v0.js"></script>
-        <script type="text/javascript" src="js/leaflet.d3.js"></script>
-        <script type="text/javascript" src="js/script.js"></script>
-        <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-        <script type="text/javascript" src="js/search.js"></script>
-    </body>
+      </div>
+    </div>
+    <script src="js/moment.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.6.0/underscore-min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/mustache.js/0.8.1/mustache.min.js"></script>
+    <script src="js/leaflet.js"></script>
+    <script src="js/leaflet.css.js"></script>
+    <script src="js/leaflet.markercluster.js"></script>
+    <script src="js/leaflet-providers.js"></script>
+    <script src="js/leaflet.hash.js"></script>
+    <script src="js/d3.v3.js"></script>
+    <script src="js/colorbrewer.js"></script>
+    <script src="js/topojson.v0.js"></script>
+    <script src="js/leaflet.d3.js"></script>
+    <script src="js/script.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="js/animatescroll.min.js"></script>
+    <script src="js/search.js"></script>
+  </body>
 </html>
